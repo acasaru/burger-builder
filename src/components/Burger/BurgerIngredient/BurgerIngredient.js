@@ -1,7 +1,6 @@
 import React from 'react'
 import classes from './BurgerIngredient.module.css'
 import PropTypes from 'prop-types'
-import { isParenthesizedExpression } from '@babel/types';
 
 const BurgerIngredient = (props)=>{
     let ingredient = null;

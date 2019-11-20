@@ -1,13 +1,98 @@
 import React from 'react'
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary'
+import Burger from '../../components/Burger/Burger'
+import BuildControls from '../../components/Burger/BuildControls/BuildControls'
 
+
+const INGREDIENT_PRICES ={
+    salad:0.5,
+    cheese:0.7,
+    meat:1.2,
+    bacon:0.8
+};
 
 class BurgerBuilder extends React.Component{
+    state={
+        ingredients:{
+            salad:0,
+            bacon:0,
+            cheese:0,
+            meat:0
+        },
+        totalPrice : 4,
+        purchasable:false
+    };
+    
+    addIngredientHandler = this.addIngredientHandler.bind(this);
+    removeIngredientHandler = this.removeIngredientHandler.bind(this);
+
+    addIngredientHandler(type){
+        const oldCount = this.state.ingredients[type];
+        const newCount = oldCount +1;
+        const newIngredients = {
+            ...this.state.ingredients
+        };
+        newIngredients[type] = newCount;
+
+        const priceAddition = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice + priceAddition;
+
+        this.setState({totalPrice:newPrice, ingredients:newIngredients})
+
+        this.updatePurchaseState()
+    };
+
+    removeIngredientHandler(type){
+        const oldCount = this.state.ingredients[type];
+        const newCount = oldCount - 1;
+        if(newCount<0)
+            return;
+
+        const newIngredients = {
+            ...this.state.ingredients
+        };
+        newIngredients[type] = newCount;
+
+        const priceAddition = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice + priceAddition;
+
+        this.setState({totalPrice:newPrice, ingredients:newIngredients})
+
+        this.updatePurchaseState()
+    }
+
+    updatePurchaseState(){
+        let ingredientsCopy = {
+            ...this.state.ingredients
+        }
+        let sum = Object.keys(ingredientsCopy)
+            .map(key=>ingredientsCopy[key])
+            .reduce((sum, el)=> sum + el, 0);
+
+        console.log(sum);
+        this.setState({purchasable: (sum>0)})
+
+    }
     render(){
+        const disableInfo ={
+            ...this.state.ingredients
+        }
+        for(let key in disableInfo){
+            disableInfo[key] = (disableInfo[key]<=0)
+        }
+        console.log(disableInfo);
+        
         return(
           <Auxiliary>
-              <div>buger display</div>
-              <div>burger controls</div>
+              <Burger ingredients={this.state.ingredients}/>
+              <BuildControls 
+                addIngredient={this.addIngredientHandler} 
+                removeIngredient={this.removeIngredientHandler}
+                disableInfo = {disableInfo}
+                totalPrice ={this.state.totalPrice}
+                purchasable={this.state.purchasable}/>
           </Auxiliary> 
         );
     }
