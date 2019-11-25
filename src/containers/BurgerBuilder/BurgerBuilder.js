@@ -2,6 +2,8 @@ import React from 'react'
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary'
 import Burger from '../../components/Burger/Burger'
 import BuildControls from '../../components/Burger/BuildControls/BuildControls'
+import Modal from '../../components/UI/Modal/Modal';
+import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 
 
 const INGREDIENT_PRICES ={
@@ -20,11 +22,13 @@ class BurgerBuilder extends React.Component{
             meat:0
         },
         totalPrice : 4,
-        purchasable:false
+        purchasable:false,
+        purchasing:false,
     };
     
     addIngredientHandler = this.addIngredientHandler.bind(this);
     removeIngredientHandler = this.removeIngredientHandler.bind(this);
+    purchaseHandler = this.purchaseHandler.bind(this);
 
     addIngredientHandler(type){
         const oldCount = this.state.ingredients[type];
@@ -40,7 +44,7 @@ class BurgerBuilder extends React.Component{
 
         this.setState({totalPrice:newPrice, ingredients:newIngredients})
 
-        this.updatePurchaseState()
+        this.updatePurchaseState(newIngredients)
     };
 
     removeIngredientHandler(type){
@@ -60,21 +64,34 @@ class BurgerBuilder extends React.Component{
 
         this.setState({totalPrice:newPrice, ingredients:newIngredients})
 
-        this.updatePurchaseState()
+        this.updatePurchaseState(newIngredients)
     }
 
-    updatePurchaseState(){
+    updatePurchaseState(newIngredients){
         let ingredientsCopy = {
-            ...this.state.ingredients
+            ...newIngredients
         }
         let sum = Object.keys(ingredientsCopy)
             .map(key=>ingredientsCopy[key])
             .reduce((sum, el)=> sum + el, 0);
-
+        console.log(ingredientsCopy);
         console.log(sum);
         this.setState({purchasable: (sum>0)})
 
     }
+
+    purchaseHandler(){
+        this.setState({purchasing:true})
+    }
+
+    purchaseCancelHandler = ()=>{
+        this.setState({purchasing:false})
+    }
+
+    purchaseContinueHandler = ()=>{
+        alert('Continue')
+    }
+
     render(){
         const disableInfo ={
             ...this.state.ingredients
@@ -86,13 +103,23 @@ class BurgerBuilder extends React.Component{
         
         return(
           <Auxiliary>
+              <Modal show={this.state.purchasing} 
+                     modalClosed={this.purchaseCancelHandler}>
+                  <OrderSummary ingredients={this.state.ingredients}
+                     purchaseCancelled={this.purchaseCancelHandler}
+                     purchaseContinue={this.purchaseContinueHandler}
+                     totalPrice={this.state.totalPrice}>
+                  </OrderSummary>
+              </Modal>
               <Burger ingredients={this.state.ingredients}/>
               <BuildControls 
                 addIngredient={this.addIngredientHandler} 
                 removeIngredient={this.removeIngredientHandler}
                 disableInfo = {disableInfo}
                 totalPrice ={this.state.totalPrice}
-                purchasable={this.state.purchasable}/>
+                purchasable={this.state.purchasable}
+                purchase={this.purchaseHandler}
+                />
           </Auxiliary> 
         );
     }
